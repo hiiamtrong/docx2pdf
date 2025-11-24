@@ -13,7 +13,7 @@ except ImportError:
 __version__ = version(__package__)
 
 
-def windows(paths, keep_active):
+def windows(paths, keep_active, delete_comments):
     import win32com.client
 
     word = win32com.client.Dispatch("Word.Application")
@@ -24,6 +24,11 @@ def windows(paths, keep_active):
             pdf_filepath = Path(paths["output"]) / (str(docx_filepath.stem) + ".pdf")
             doc = word.Documents.Open(str(docx_filepath))
             try:
+                if delete_comments:
+                    # Hide comments and revisions in PDF without modifying DOCX
+                    doc.ActiveWindow.View.ShowComments = False
+                    doc.ActiveWindow.View.ShowRevisionsAndComments = False
+                    doc.ActiveWindow.View.RevisionsView = 0  # wdRevisionsViewFinal
                 doc.SaveAs(str(pdf_filepath), FileFormat=wdFormatPDF)
             except:
                 raise
@@ -35,6 +40,11 @@ def windows(paths, keep_active):
         pdf_filepath = Path(paths["output"]).resolve()
         doc = word.Documents.Open(str(docx_filepath))
         try:
+            if delete_comments:
+                # Hide comments and revisions in PDF without modifying DOCX
+                doc.ActiveWindow.View.ShowComments = False
+                doc.ActiveWindow.View.ShowRevisionsAndComments = False
+                doc.ActiveWindow.View.RevisionsView = 0  # wdRevisionsViewFinal
             doc.SaveAs(str(pdf_filepath), FileFormat=wdFormatPDF)
         except:
             raise
@@ -46,7 +56,7 @@ def windows(paths, keep_active):
         word.Quit()
 
 
-def macos(paths, keep_active):
+def macos(paths, keep_active, delete_comments):
     script = (Path(__file__).parent / "convert.jxa").resolve()
     cmd = [
         "/usr/bin/osascript",
@@ -56,6 +66,7 @@ def macos(paths, keep_active):
         str(paths["input"]),
         str(paths["output"]),
         str(keep_active).lower(),
+        str(delete_comments).lower(),
     ]
 
     def run(cmd):
@@ -106,12 +117,12 @@ def resolve_paths(input_path, output_path):
     return output
 
 
-def convert(input_path, output_path=None, keep_active=False):
+def convert(input_path, output_path=None, keep_active=False, delete_comments=False):
     paths = resolve_paths(input_path, output_path)
     if sys.platform == "darwin":
-        return macos(paths, keep_active)
+        return macos(paths, keep_active, delete_comments)
     elif sys.platform == "win32":
-        return windows(paths, keep_active)
+        return windows(paths, keep_active, delete_comments)
     else:
         raise NotImplementedError(
             "docx2pdf is not implemented for linux as it requires Microsoft Word to be installed"
@@ -166,6 +177,12 @@ def cli():
         help="prevent closing word after conversion",
     )
     parser.add_argument(
+        "--delete-comments",
+        action="store_true",
+        default=False,
+        help="delete all comments from document before conversion",
+    )
+    parser.add_argument(
         "--version", action="store_true", default=False, help="display version and exit"
     )
 
@@ -175,4 +192,4 @@ def cli():
     else:
         args = parser.parse_args()
 
-    convert(args.input, args.output, args.keep_active)
+    convert(args.input, args.output, args.keep_active, args.delete_comments)
