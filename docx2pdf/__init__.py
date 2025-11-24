@@ -13,7 +13,7 @@ except ImportError:
 __version__ = version(__package__)
 
 
-def windows(paths, keep_active, delete_comments):
+def windows(paths, keep_active, hide_markup):
     import win32com.client
 
     word = win32com.client.Dispatch("Word.Application")
@@ -24,7 +24,7 @@ def windows(paths, keep_active, delete_comments):
             pdf_filepath = Path(paths["output"]) / (str(docx_filepath.stem) + ".pdf")
             doc = word.Documents.Open(str(docx_filepath))
             try:
-                if delete_comments:
+                if hide_markup:
                     # Hide comments and revisions in PDF without modifying DOCX
                     doc.ActiveWindow.View.ShowComments = False
                     doc.ActiveWindow.View.ShowRevisionsAndComments = False
@@ -40,7 +40,7 @@ def windows(paths, keep_active, delete_comments):
         pdf_filepath = Path(paths["output"]).resolve()
         doc = word.Documents.Open(str(docx_filepath))
         try:
-            if delete_comments:
+            if hide_markup:
                 # Hide comments and revisions in PDF without modifying DOCX
                 doc.ActiveWindow.View.ShowComments = False
                 doc.ActiveWindow.View.ShowRevisionsAndComments = False
@@ -56,7 +56,7 @@ def windows(paths, keep_active, delete_comments):
         word.Quit()
 
 
-def macos(paths, keep_active, delete_comments):
+def macos(paths, keep_active, hide_markup):
     script = (Path(__file__).parent / "convert.jxa").resolve()
     cmd = [
         "/usr/bin/osascript",
@@ -66,7 +66,7 @@ def macos(paths, keep_active, delete_comments):
         str(paths["input"]),
         str(paths["output"]),
         str(keep_active).lower(),
-        str(delete_comments).lower(),
+        str(hide_markup).lower(),
     ]
 
     def run(cmd):
@@ -117,12 +117,12 @@ def resolve_paths(input_path, output_path):
     return output
 
 
-def convert(input_path, output_path=None, keep_active=False, delete_comments=False):
+def convert(input_path, output_path=None, keep_active=False, hide_markup=False):
     paths = resolve_paths(input_path, output_path)
     if sys.platform == "darwin":
-        return macos(paths, keep_active, delete_comments)
+        return macos(paths, keep_active, hide_markup)
     elif sys.platform == "win32":
-        return windows(paths, keep_active, delete_comments)
+        return windows(paths, keep_active, hide_markup)
     else:
         raise NotImplementedError(
             "docx2pdf is not implemented for linux as it requires Microsoft Word to be installed"
@@ -177,10 +177,10 @@ def cli():
         help="prevent closing word after conversion",
     )
     parser.add_argument(
-        "--delete-comments",
+        "--hide-markup",
         action="store_true",
         default=False,
-        help="delete all comments from document before conversion",
+        help="hide markup elements (comments, revisions, ink annotations) in PDF output without modifying the original DOCX file",
     )
     parser.add_argument(
         "--version", action="store_true", default=False, help="display version and exit"
@@ -192,4 +192,4 @@ def cli():
     else:
         args = parser.parse_args()
 
-    convert(args.input, args.output, args.keep_active, args.delete_comments)
+    convert(args.input, args.output, args.keep_active, args.hide_markup)
