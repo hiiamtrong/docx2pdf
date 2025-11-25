@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "docx2pdf"
-version = "0.1.8"
-description = "Convert docx to pdf on Windows or macOS directly using Microsoft Word (must be installed)."
+name = "docx2pdf-hide-markup"
+version = "0.1.9"
+description = "Convert docx to pdf on Windows or macOS directly using Microsoft Word (must be installed). Fork with --hide-markup option to hide comments and revisions."
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/AlJohri/docx2pdf"
-repository = "https://github.com/AlJohri/docx2pdf"
-authors = ["Al Johri <al.johri@gmail.com>"]
+homepage = "https://github.com/hiiamtrong/docx2pdf"
+repository = "https://github.com/hiiamtrong/docx2pdf"
+authors = ["Trong <hiiamtrong@github.com>", "Al Johri <al.johri@gmail.com>"]
 classifiers = [
 	"Operating System :: MacOS",
 	"Environment :: MacOS X",
