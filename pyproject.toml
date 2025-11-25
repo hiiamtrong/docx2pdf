@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "docx2pdf"
+name = "docx2pdf-markup"
 version = "0.1.9"
 description = "Convert docx to pdf on Windows or macOS directly using Microsoft Word (must be installed). Fork with --hide-markup option to hide comments and revisions."
 license = "MIT"
@@ -7,6 +7,7 @@ readme = "README.md"
 homepage = "https://github.com/hiiamtrong/docx2pdf"
 repository = "https://github.com/hiiamtrong/docx2pdf"
 authors = ["Trong <hiiamtrong@github.com>", "Al Johri <al.johri@gmail.com>"]
+packages = [{include = "docx2pdf"}]
 classifiers = [
 	"Operating System :: MacOS",
 	"Environment :: MacOS X",
@@ -28,6 +29,7 @@ pytest = "^5.2"
 
 [tool.poetry.scripts]
 docx2pdf = 'docx2pdf:cli'
+docx2pdf-markup = 'docx2pdf:cli'
 
 [build-system]
 requires = ["poetry>=0.12"]
